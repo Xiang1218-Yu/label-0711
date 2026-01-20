@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="2025年中国个人所得税计算器 - 综合所得年度汇算">
+  <title>2025年中国个人所得税计算器</title>
+  <style>
+    /* 关键CSS内联，避免FOUC */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: "Microsoft YaHei", "Source Han Sans CN", "PingFang SC", sans-serif;
+      background: #E8F4F8;
+      min-height: 100vh;
+    }
+    #app { max-width: 1200px; margin: 0 auto; padding: 16px; }
+    .loading-placeholder {
+      text-align: center;
+      padding: 100px 20px;
+      color: #666;
+    }
+    .loading-placeholder h1 {
+      color: #005EA5;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="loading-placeholder">
+      <h1>2025年中国个人所得税计算器</h1>
+      <p>正在加载...</p>
+    </div>
+  </div>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  tax-calculator:
+    build:
+      context: ./frontend-fortune
+      dockerfile: Dockerfile
+    ports:
+      - "8081:80"
+    restart: unless-stopped

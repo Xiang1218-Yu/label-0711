@@ -1,0 +1,5 @@
+frontend-fortune/node_modules/
+frontend-fortune/dist/
+frontend-fortune/.vite/
+.DS_Store
+*.log
