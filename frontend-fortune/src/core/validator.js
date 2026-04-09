@@ -95,6 +95,16 @@ export class Validator {
       }
     }
     
+    // 住房贷款利息与住房租金互斥校验（税法规定不能同时享受）
+    const housingLoanMonths = formData.additionalDeductions?.housingLoan?.months || 0;
+    const housingRentMonths = formData.additionalDeductions?.housingRent?.months || 0;
+    if (housingLoanMonths > 0 && housingRentMonths > 0) {
+      errors.push({
+        field: 'additionalDeductions.housing',
+        message: '住房贷款利息与住房租金在一个纳税年度内不能同时享受，请只选择一项填写'
+      });
+    }
+    
     return {
       valid: errors.length === 0,
       errors
