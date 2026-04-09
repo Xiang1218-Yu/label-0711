@@ -48,6 +48,7 @@ export class ResultCard {
             <span class="quick-deduction">0</span>
           </div>
         </div>
+        <div class="result-warnings" style="display: none;"></div>
       </div>
     `;
     
@@ -73,6 +74,23 @@ export class ResultCard {
     this.element.querySelector('.tax-rate').textContent = Format.percent(result.taxRatePercent);
     this.element.querySelector('.quick-deduction').textContent = Format.currencyInt(result.quickDeduction) + ' 元';
     
+    // 处理互斥冲突警告
+    const warningsEl = this.element.querySelector('.result-warnings');
+    if (result.additionalDeductions.housingConflict) {
+      const housingLoan = result.additionalDeductions.housingLoan;
+      const housingRent = result.additionalDeductions.housingRent;
+      let warningText = '⚠️ 住房贷款利息与住房租金不能同时享受，已自动选择较高金额：';
+      if (housingLoan > 0) {
+        warningText += `住房贷款利息 ${Format.currency(housingLoan)} 元`;
+      } else {
+        warningText += `住房租金 ${Format.currency(housingRent)} 元`;
+      }
+      warningsEl.innerHTML = `<div class="warning-item">${warningText}</div>`;
+      warningsEl.style.display = '';
+    } else {
+      warningsEl.style.display = 'none';
+    }
+
     // 淡入动画
     requestAnimationFrame(() => {
       content.style.transition = 'opacity 0.3s ease';

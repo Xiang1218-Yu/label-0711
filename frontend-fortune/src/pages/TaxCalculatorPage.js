@@ -126,26 +126,40 @@ export class TaxCalculatorPage {
   
   renderAdditionalInputs() {
     const container = document.getElementById('additional-inputs');
-    
+
     const additionalFields = [
       { type: 'childEducation', label: '子女教育' },
       { type: 'continuingEducation', label: '继续教育' },
       { type: 'seriousIllness', label: '大病医疗' },
-      { type: 'housingLoan', label: '住房贷款利息' },
-      { type: 'housingRent', label: '住房租金' },
+      { type: 'housingLoan', label: '住房贷款利息', mutuallyExclusive: 'housingRent' },
+      { type: 'housingRent', label: '住房租金', mutuallyExclusive: 'housingLoan' },
       { type: 'elderlySupport', label: '赡养老人' },
       { type: 'childCare', label: '婴幼儿照护' }
     ];
-    
+
     additionalFields.forEach(field => {
       const item = new DeductionItem({
         type: field.type,
         label: field.label,
-        onChange: () => {}
+        mutuallyExclusive: field.mutuallyExclusive,
+        onChange: (value, amount) => this.handleDeductionChange(field.type, value, amount)
       });
       this.deductions[field.type] = item;
       container.appendChild(item.render());
     });
+  }
+
+  handleDeductionChange(type, value, amount) {
+    // 处理住房贷款利息与住房租金互斥
+    if (type === 'housingLoan' && amount > 0) {
+      // 如果选择了住房贷款利息，重置住房租金
+      this.deductions.housingRent.reset();
+      Toast.info('住房贷款利息与住房租金不能同时享受，已自动重置住房租金');
+    } else if (type === 'housingRent' && amount > 0) {
+      // 如果选择了住房租金，重置住房贷款利息
+      this.deductions.housingLoan.reset();
+      Toast.info('住房贷款利息与住房租金不能同时享受，已自动重置住房贷款利息');
+    }
   }
   
   renderResultComponents() {
