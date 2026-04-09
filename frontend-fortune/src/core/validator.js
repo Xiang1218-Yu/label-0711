@@ -95,6 +95,16 @@ export class Validator {
       }
     }
     
+    // 校验住房贷款利息与住房租金的互斥性
+    const housingLoanMonths = formData.additionalDeductions?.housingLoan?.months || 0;
+    const housingRentMonths = formData.additionalDeductions?.housingRent?.months || 0;
+    if (housingLoanMonths > 0 && housingRentMonths > 0) {
+      errors.push({
+        field: 'additionalDeductions.housingLoan',
+        message: '住房贷款利息与住房租金不能同时享受，请只选择其中一项'
+      });
+    }
+    
     return {
       valid: errors.length === 0,
       errors
