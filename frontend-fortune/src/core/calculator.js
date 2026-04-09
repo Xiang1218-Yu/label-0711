@@ -72,11 +72,23 @@ export class TaxCalculator {
     const seriousIllnessAmount = Math.min(seriousIllness.amount || 0, 80000);
     
     // 住房贷款利息：1000元/月
-    const housingLoanAmount = 1000 * housingLoan.months;
-    
     // 住房租金：按城市等级
+    // 注意：根据税法规定，住房贷款利息与住房租金不能同时享受
     const rentRates = { tier1: 1500, tier2: 1100, tier3: 800 };
+    const housingLoanAmount = 1000 * housingLoan.months;
     const housingRentAmount = (rentRates[housingRent.cityTier] || 0) * housingRent.months;
+    
+    // 互斥检查：如果两项同时有月份，取较大值
+    let finalHousingDeduction = 0;
+    let hasBothHousingDeductions = false;
+    
+    if (housingLoan.months > 0 && housingRent.months > 0) {
+      hasBothHousingDeductions = true;
+      // 提示：不能同时扣除，取金额较大的
+      finalHousingDeduction = Math.max(housingLoanAmount, housingRentAmount);
+    } else {
+      finalHousingDeduction = housingLoanAmount + housingRentAmount;
+    }
     
     // 赡养老人：2000元/月
     const elderlySupportAmount = 2000 * elderlySupport.months;
@@ -88,12 +100,13 @@ export class TaxCalculator {
       childEducation: childEducationAmount,
       continuingEducation: continuingEducationAmount,
       seriousIllness: seriousIllnessAmount,
-      housingLoan: housingLoanAmount,
-      housingRent: housingRentAmount,
+      housingLoan: hasBothHousingDeductions ? (housingLoanAmount > housingRentAmount ? housingLoanAmount : 0) : housingLoanAmount,
+      housingRent: hasBothHousingDeductions ? (housingRentAmount > housingLoanAmount ? housingRentAmount : 0) : housingRentAmount,
       elderlySupport: elderlySupportAmount,
       childCare: childCareAmount,
+      hasBothHousingDeductions,
       total: childEducationAmount + continuingEducationAmount + seriousIllnessAmount +
-             housingLoanAmount + housingRentAmount + elderlySupportAmount + childCareAmount
+             finalHousingDeduction + elderlySupportAmount + childCareAmount
     };
   }
   
