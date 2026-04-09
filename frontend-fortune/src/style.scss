@@ -561,6 +561,17 @@ html, body {
       margin: 4px 0;
       .item-value { color: $primary; }
     }
+    
+    &.warn {
+      background: #FEF3C7;
+      padding: 8px $space-xs;
+      border-radius: 8px;
+      margin: 4px 0;
+      border-left: 3px solid $warning;
+      
+      .item-label { color: #92400E; }
+      .item-value { color: $warning; }
+    }
   }
 }
 
