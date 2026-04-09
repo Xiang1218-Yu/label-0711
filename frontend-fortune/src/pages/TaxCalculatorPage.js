@@ -5,6 +5,7 @@ import { ProcessPanel } from '../components/ProcessPanel.js';
 import { Toast } from '../components/Toast.js';
 import { TaxCalculator } from '../core/calculator.js';
 import { Storage } from '../core/storage.js';
+import { Validator } from '../core/validator.js';
 import { DEFAULT_VALUES } from '../config/constants.js';
 
 /**
@@ -199,6 +200,14 @@ export class TaxCalculatorPage {
     setTimeout(() => {
       try {
         const formData = this.getFormData();
+        
+        const validation = Validator.validateForm(formData);
+        if (!validation.valid) {
+          const errorMessages = validation.errors.map(e => e.message).join('\n');
+          Toast.error(errorMessages);
+          return;
+        }
+        
         const result = TaxCalculator.calculate(formData);
         
         this.resultCard.update(result);

@@ -95,6 +95,16 @@ export class Validator {
       }
     }
     
+    // 校验住房贷款利息与住房租金互斥
+    const housingLoanMonths = formData.additionalDeductions?.housingLoan?.months || 0;
+    const housingRentMonths = formData.additionalDeductions?.housingRent?.months || 0;
+    if (housingLoanMonths > 0 && housingRentMonths > 0) {
+      errors.push({ 
+        field: 'additionalDeductions.housing', 
+        message: '根据税法规定，住房贷款利息与住房租金专项附加扣除不能同时享受，请选择其中一项填报' 
+      });
+    }
+    
     return {
       valid: errors.length === 0,
       errors
