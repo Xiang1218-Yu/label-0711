@@ -204,8 +204,14 @@ export class TaxCalculatorPage {
         this.resultCard.update(result);
         this.processPanel.update(result);
         
+        // 检测到住房贷款和租金同时扣除时显示警告
+        if (result.additionalDeductions.hasBothHousingDeductions) {
+          Toast.warning('注意：根据税法规定，住房贷款利息与住房租金不能同时享受。系统已自动适用较优扣除方案。');
+        } else {
+          Toast.success('计算完成');
+        }
+        
         Storage.saveRecord({ input: formData, result });
-        Toast.success('计算完成');
       } catch (error) {
         console.error('计算错误:', error);
         Toast.error('计算出错，请检查输入');
