@@ -141,11 +141,32 @@ export class TaxCalculatorPage {
       const item = new DeductionItem({
         type: field.type,
         label: field.label,
-        onChange: () => {}
+        onChange: (state, amount) => this.handleDeductionChange(field.type, state, amount)
       });
       this.deductions[field.type] = item;
       container.appendChild(item.render());
     });
+  }
+  
+  /**
+   * 处理专项附加扣除项变更
+   * 实现住房贷款利息与住房租金的互斥逻辑
+   */
+  handleDeductionChange(type, state, amount) {
+    // 住房贷款利息与住房租金互斥：选择一项时自动清空另一项
+    if (type === 'housingLoan' && state.months > 0) {
+      const rentItem = this.deductions.housingRent;
+      if (rentItem && rentItem.state.months > 0) {
+        rentItem.reset();
+        Toast.info('已自动清空住房租金（与住房贷款利息不能同时享受）');
+      }
+    } else if (type === 'housingRent' && state.months > 0) {
+      const loanItem = this.deductions.housingLoan;
+      if (loanItem && loanItem.state.months > 0) {
+        loanItem.reset();
+        Toast.info('已自动清空住房贷款利息（与住房租金不能同时享受）');
+      }
+    }
   }
   
   renderResultComponents() {

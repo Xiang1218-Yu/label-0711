@@ -71,12 +71,23 @@ export class TaxCalculator {
     // 大病医疗：据实扣除，上限80000
     const seriousIllnessAmount = Math.min(seriousIllness.amount || 0, 80000);
     
-    // 住房贷款利息：1000元/月
-    const housingLoanAmount = 1000 * housingLoan.months;
+    // 住房贷款利息与住房租金互斥检查
+    // 根据税法规定，纳税人及其配偶在一个纳税年度内不能同时享受住房贷款利息和住房租金专项附加扣除
+    let housingLoanAmount = 0;
+    let housingRentAmount = 0;
+    const loanMonths = housingLoan.months || 0;
+    const rentMonths = housingRent.months || 0;
     
-    // 住房租金：按城市等级
-    const rentRates = { tier1: 1500, tier2: 1100, tier3: 800 };
-    const housingRentAmount = (rentRates[housingRent.cityTier] || 0) * housingRent.months;
+    if (loanMonths > 0 && rentMonths > 0) {
+      throw new Error('住房贷款利息与住房租金不能同时享受，请只选择其中一项');
+    }
+    
+    if (loanMonths > 0) {
+      housingLoanAmount = 1000 * loanMonths;
+    } else if (rentMonths > 0) {
+      const rentRates = { tier1: 1500, tier2: 1100, tier3: 800 };
+      housingRentAmount = (rentRates[housingRent.cityTier] || 0) * rentMonths;
+    }
     
     // 赡养老人：2000元/月
     const elderlySupportAmount = 2000 * elderlySupport.months;
