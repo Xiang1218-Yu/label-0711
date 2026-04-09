@@ -72,11 +72,23 @@ export class TaxCalculator {
     const seriousIllnessAmount = Math.min(seriousIllness.amount || 0, 80000);
     
     // 住房贷款利息：1000元/月
-    const housingLoanAmount = 1000 * housingLoan.months;
+    let housingLoanAmount = 1000 * housingLoan.months;
     
     // 住房租金：按城市等级
     const rentRates = { tier1: 1500, tier2: 1100, tier3: 800 };
-    const housingRentAmount = (rentRates[housingRent.cityTier] || 0) * housingRent.months;
+    let housingRentAmount = (rentRates[housingRent.cityTier] || 0) * housingRent.months;
+    
+    // 住房贷款利息与住房租金互斥处理（税法规定：二者不能同时享受）
+    let exclusiveAdjustment = null;
+    if (housingLoan.months > 0 && housingRent.months > 0) {
+      if (housingLoanAmount >= housingRentAmount) {
+        housingRentAmount = 0;
+        exclusiveAdjustment = 'housingRent';
+      } else {
+        housingLoanAmount = 0;
+        exclusiveAdjustment = 'housingLoan';
+      }
+    }
     
     // 赡养老人：2000元/月
     const elderlySupportAmount = 2000 * elderlySupport.months;
@@ -92,6 +104,7 @@ export class TaxCalculator {
       housingRent: housingRentAmount,
       elderlySupport: elderlySupportAmount,
       childCare: childCareAmount,
+      exclusiveAdjustment,
       total: childEducationAmount + continuingEducationAmount + seriousIllnessAmount +
              housingLoanAmount + housingRentAmount + elderlySupportAmount + childCareAmount
     };

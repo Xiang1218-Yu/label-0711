@@ -230,5 +230,24 @@ export class DeductionItem {
     });
     
     this.updateDisplay();
+    this.enable();
+  }
+  
+  disable() {
+    if (!this.element) return;
+    this.element.classList.add('disabled');
+    const selects = this.element.querySelectorAll('.deduction-select');
+    const inputs = this.element.querySelectorAll('.deduction-input');
+    selects.forEach(s => s.disabled = true);
+    inputs.forEach(i => i.disabled = true);
+  }
+  
+  enable() {
+    if (!this.element) return;
+    this.element.classList.remove('disabled');
+    const selects = this.element.querySelectorAll('.deduction-select');
+    const inputs = this.element.querySelectorAll('.deduction-input');
+    selects.forEach(s => s.disabled = false);
+    inputs.forEach(i => i.disabled = false);
   }
 }

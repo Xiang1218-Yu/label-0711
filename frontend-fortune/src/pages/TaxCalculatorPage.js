@@ -141,7 +141,7 @@ export class TaxCalculatorPage {
       const item = new DeductionItem({
         type: field.type,
         label: field.label,
-        onChange: () => {}
+        onChange: (state, amount) => this.onDeductionChange(field.type, state, amount)
       });
       this.deductions[field.type] = item;
       container.appendChild(item.render());
@@ -187,6 +187,25 @@ export class TaxCalculatorPage {
     };
   }
   
+  onDeductionChange(type, state, amount) {
+    if (type === 'housingLoan' || type === 'housingRent') {
+      const hasLoan = this.deductions.housingLoan.getValue().months > 0;
+      const hasRent = this.deductions.housingRent.getValue().months > 0;
+      
+      if (type === 'housingLoan' && state.months > 0 && hasRent) {
+        Toast.warn('根据税法规定：住房贷款利息与住房租金不能同时享受，已禁用租金扣除');
+        this.deductions.housingRent.reset();
+        this.deductions.housingRent.disable();
+        setTimeout(() => this.deductions.housingRent.enable(), 100);
+      } else if (type === 'housingRent' && state.months > 0 && hasLoan) {
+        Toast.warn('根据税法规定：住房贷款利息与住房租金不能同时享受，已禁用房贷利息扣除');
+        this.deductions.housingLoan.reset();
+        this.deductions.housingLoan.disable();
+        setTimeout(() => this.deductions.housingLoan.enable(), 100);
+      }
+    }
+  }
+  
   calculate() {
     const btn = document.getElementById('btn-calculate');
     const btnText = btn.querySelector('.btn-text');
@@ -205,7 +224,14 @@ export class TaxCalculatorPage {
         this.processPanel.update(result);
         
         Storage.saveRecord({ input: formData, result });
-        Toast.success('计算完成');
+        
+        if (result.additionalDeductions.exclusiveAdjustment) {
+          const adjusted = result.additionalDeductions.exclusiveAdjustment;
+          const name = adjusted === 'housingLoan' ? '住房贷款利息' : '住房租金';
+          Toast.warn(`检测到同时申报，已自动按较高值扣除（${name}已置零）`);
+        } else {
+          Toast.success('计算完成');
+        }
       } catch (error) {
         console.error('计算错误:', error);
         Toast.error('计算出错，请检查输入');
