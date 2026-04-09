@@ -492,6 +492,20 @@ html, body {
       &:last-child { border-bottom: none; }
     }
   }
+  
+  .result-warnings {
+    margin-top: $space-sm;
+    
+    .warning-item {
+      background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+      border: 1px solid $warning;
+      border-radius: $radius-sm;
+      padding: $space-sm;
+      font-size: 13px;
+      color: #92400E;
+      line-height: 1.5;
+    }
+  }
 }
 
 .process-panel {

@@ -45,6 +45,7 @@ export class TaxCalculator {
   
   /**
    * 计算专项附加扣除总额
+   * 注意：住房贷款利息与住房租金不能同时享受
    */
   static calculateAdditionalDeductions(deductions) {
     const {
@@ -56,10 +57,10 @@ export class TaxCalculator {
       elderlySupport = { months: 0 },
       childCare = { amount: 0, months: 0 }
     } = deductions;
-    
+
     // 子女教育：1000元/月/子女
     const childEducationAmount = childEducation.amount * 1000 * childEducation.months;
-    
+
     // 继续教育
     let continuingEducationAmount = 0;
     if (continuingEducation.type === 'academic') {
@@ -67,33 +68,49 @@ export class TaxCalculator {
     } else if (continuingEducation.type === 'professional') {
       continuingEducationAmount = continuingEducation.months > 0 ? 3600 : 0;
     }
-    
+
     // 大病医疗：据实扣除，上限80000
     const seriousIllnessAmount = Math.min(seriousIllness.amount || 0, 80000);
-    
+
     // 住房贷款利息：1000元/月
     const housingLoanAmount = 1000 * housingLoan.months;
-    
+
     // 住房租金：按城市等级
     const rentRates = { tier1: 1500, tier2: 1100, tier3: 800 };
     const housingRentAmount = (rentRates[housingRent.cityTier] || 0) * housingRent.months;
-    
+
     // 赡养老人：2000元/月
     const elderlySupportAmount = 2000 * elderlySupport.months;
-    
+
     // 婴幼儿照护：1000元/月/婴幼儿
     const childCareAmount = childCare.amount * 1000 * childCare.months;
-    
+
+    // 住房贷款利息与住房租金互斥检查
+    let effectiveHousingLoanAmount = housingLoanAmount;
+    let effectiveHousingRentAmount = housingRentAmount;
+    let housingConflict = false;
+
+    if (housingLoanAmount > 0 && housingRentAmount > 0) {
+      housingConflict = true;
+      // 税法规定：两者不能同时享受，取金额较高者
+      if (housingLoanAmount >= housingRentAmount) {
+        effectiveHousingRentAmount = 0;
+      } else {
+        effectiveHousingLoanAmount = 0;
+      }
+    }
+
     return {
       childEducation: childEducationAmount,
       continuingEducation: continuingEducationAmount,
       seriousIllness: seriousIllnessAmount,
-      housingLoan: housingLoanAmount,
-      housingRent: housingRentAmount,
+      housingLoan: effectiveHousingLoanAmount,
+      housingRent: effectiveHousingRentAmount,
       elderlySupport: elderlySupportAmount,
       childCare: childCareAmount,
       total: childEducationAmount + continuingEducationAmount + seriousIllnessAmount +
-             housingLoanAmount + housingRentAmount + elderlySupportAmount + childCareAmount
+             effectiveHousingLoanAmount + effectiveHousingRentAmount + elderlySupportAmount + childCareAmount,
+      housingConflict
     };
   }
   
